@@ -21,7 +21,8 @@ class Dashboard extends DashboardTool
                 
         if($login_user->getAccessLevel() === 'GOD') {
             $this->addBlock('IMPORT',1,2,'Import data');
-            $this->addItem('IMPORT','Import contact data',['link'=>'import']);
+            $this->addItem('IMPORT','Import CSV contact data',['link'=>'import']);
+            $this->addItem('IMPORT','Import contacts from internal data',['link'=>'import_custom']);
 
             $this->addBlock('CONFIG',1,3,'Module Configuration');
             $this->addItem('CONFIG','Setup Database',['link'=>'setup_data','icon'=>'setup']);

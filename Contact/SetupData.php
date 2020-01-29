@@ -23,7 +23,11 @@ class SetupData extends SetupModuledata
                               `create_date` date NOT NULL DEFAULT \'0000-00-00\',
                               `url` varchar(250) NOT NULL,
                               `cell` varchar(64) NOT NULL,
-                              PRIMARY KEY (`contact_id`)
+                              `link_id` int(11) NOT NULL,
+                              `link_type` varchar(64) NOT NULL,
+                              `status` varchar(64) NOT NULL,
+                              PRIMARY KEY (`contact_id`),
+                              KEY `con_contact_idx1` (`email`)
                             ) ENGINE=MyISAM DEFAULT CHARSET=utf8'); 
 
         $this->addCreateSql('group',
@@ -47,6 +51,7 @@ class SetupData extends SetupModuledata
                             'CREATE TABLE `TABLE_NAME` (
                               `message_id` int(11) NOT NULL AUTO_INCREMENT,
                               `create_date` date NOT NULL DEFAULT \'0000-00-00\',
+                              `email_from` varchar(250) NOT NULL,
                               `template_id` int(11) NOT NULL,
                               `subject` varchar(250) NOT NULL,
                               `body_markdown` text NOT NULL,
@@ -84,8 +89,8 @@ class SetupData extends SetupModuledata
 
                
         //initialisation
-        $this->addInitialSql('INSERT INTO `TABLE_PREFIXcontact` (name,surname,email,cell,notes,create_date) '.
-                             'VALUES("Spongebob","Squarepants","bob@squarepants.com","+27 123 456 7890","My first fantasy contact",CURDATE())');
+        $this->addInitialSql('INSERT INTO `TABLE_PREFIXcontact` (name,surname,email,cell,notes,create_date,status) '.
+                             'VALUES("Spongebob","Squarepants","bob@squarepants.com","+27 123 456 7890","My first fantasy contact",CURDATE(),"OK"');
         
 
         //updates use time stamp in ['YYYY-MM-DD HH:MM'] format, must be unique and sequential

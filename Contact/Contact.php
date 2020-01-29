@@ -21,7 +21,7 @@ class Contact extends Table
     //configure
     public function setup($param = []) 
     {
-        $param = ['row_name'=>'Contact','col_label'=>'name'];
+        $param = ['row_name'=>'Contact','col_label'=>'name','distinct'=>true];
         parent::setup($param);
 
         $this->info['EDIT']='Enter any additional contact data into notes text field. All fields are searchable.'.
@@ -40,6 +40,10 @@ class Contact extends Table
         $this->addTableCol(array('id'=>'notes','type'=>'TEXT','title'=>'Notes','required'=>false,'list'=>false));
         $this->addTableCol(array('id'=>'create_date','type'=>'DATE','title'=>'Create date','edit'=>false,'list'=>false));
 
+
+        //this slows things down quite a bit so disable if you dont need it, and searchXtra() below
+        $this->addSql('JOIN','LEFT JOIN '.TABLE_PREFIX.'group_link AS G ON(T.contact_id = G.contact_id)');
+
         $this->addSortOrder('create_date DESC,surname,name ','Create date, Surname, Name','DEFAULT');
 
         $this->addAction(array('type'=>'check_box','text'=>''));
@@ -48,6 +52,9 @@ class Contact extends Table
         $this->addAction(array('type'=>'delete','text'=>'delete','icon_text'=>'delete','pos'=>'R'));
 
         $this->addSearch(array('name','surname','email','email_alt','tel','cell','url','address','notes','create_date'),array('rows'=>3));
+        $this->addSearchXtra('G.group_id','Message Group');
+
+        $this->addSelect('G_group_id','SELECT group_id,name FROM '.TABLE_PREFIX.'group ORDER BY name');
 
     } 
 

@@ -276,7 +276,7 @@ class Helpers {
         if($error === '') return true; else return false;  
     }
 
-    public static function importContact($db,$update = false,$format,$line,&$error) 
+    public static function importCsvContact($db,$update = false,$format,$line,&$error) 
     {
         $error_tmp = '';
         $error = '';
@@ -439,9 +439,88 @@ class Helpers {
         
         if($error !== '') return false; else return $status; 
     }
+
+
+    public static function importContact($db,$update = false,$contact,$param = [],&$error) 
+    {
+        $error_tmp = '';
+        $error = '';
+        $data = [];
+        $result = 'NONE';
+
+        if(!isset($param['format'])) $param['format'] = 'STANDARD';
+        if(!isset($param['group_id'])) {
+            $param['group_id'] = 'NONE';
+        } else {
+            if(!is_numeric($param['group_id'])) $error .= 'Invalid Contact group ID['.$param['group_id'].']';
+        }    
+
+        if(!isset($contact['name'])) $error .= 'Contact has no name. ';
+        if(!isset($contact['email'])) $error .= 'Contact has no email address. ';
+
+        if($param['format'] === 'LINKED') {
+            if(!isset($contact['link_id'])) $error .= 'Contact import requires LINK ID. ';
+            if(!isset($contact['link_type'])) $error .= 'Contact import requires LINK TYPE. ';
+        }   
+
+
+        if($error === '') {
+            $found = false;
+            
+            $sql = 'SELECT * FROM '.TABLE_PREFIX.'contact WHERE email = "'. $db->escapeSql($contact['email']).'" ';
+            $contact_exist = $db->readSqlRecord($sql);  
+            if($contact_exist != 0) {
+                $found = true;
+                $result = 'FOUND';
+                $contact_id = $contact_exist['contact_id'];
+                $where['contact_id'] = $contact_id;
+            }    
+            
+
+            $data['name'] = $contact['name'];
+            $data['email'] = $contact['email'];
+            if(isset($contact['email_alt'])) $data['email_alt'] = $contact['email_alt'];
+            if(isset($contact['surname'])) $data['surname'] = $contact['surname'];
+            if(isset($contact['cell'])) $data['cell'] = $contact['cell'];
+            if(isset($contact['tel'])) $data['tel'] = $contact['tel'];
+            if(isset($contact['address'])) $data['address'] = $contact['address'];
+            if(isset($contact['url'])) $data['url'] = $contact['url'];
+            if(isset($contact['status'])) $data['status'] = $contact['status'];
+            if($param['format'] === 'LINKED') {
+                $data['link_id'] = $contact['link_id'];
+                $data['link_type'] = $contact['link_type'];
+            }
+
+            if($found) {
+                if($update) {
+                    $db->updateRecord(TABLE_PREFIX.'contact',$data,$where,$error_tmp);
+                    if($error_tmp !== '') {
+                        $error .= 'Could NOT update Contact:'.$error_tmp; 
+                    } else {
+                        $result.= '_UPDATE'; 
+                    }
+                }    
+            } else {
+                $data['create_date'] = date('Y-m-d');
+                if(!isset($data['status'])) $data['status'] = "OK";
+
+                $contact_id = $db->insertRecord(TABLE_PREFIX.'contact',$data,$error_tmp);
+                if($error_tmp !== '') {
+                    $error .= 'Could NOT create Contact:'.$error_tmp; 
+                } else {
+                    $result = 'NEW'; 
+                }
+
+            }
+        }
+
+        if($param['group_id'] !== 'NONE' and $error === '') {
+            self::addContactToGroup($db,$contact_id,$param['group_id'],$error_tmp);
+            if($error_tmp !== '') $error .= 'Could not add contact to group: '.$error_tmp;
+        }  
+        
+        if($error !== '') return false; else return $result; 
+    }
     
     
 }
-
-
-?>

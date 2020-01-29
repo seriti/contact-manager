@@ -7,6 +7,7 @@ use Seriti\Tools\Secure;
 use Seriti\Tools\Validate;
 use Seriti\Tools\Html;
 use Seriti\Tools\Audit;
+use Seriti\Tools\Email;
 
 use App\Contact\Helpers;
 
@@ -30,6 +31,7 @@ class Message extends Table
         
         $this->addTableCol(array('id'=>'message_id','type'=>'INTEGER','title'=>'Message ID','key'=>true,'key_auto'=>true,'list'=>true));
         $this->addTableCol(array('id'=>'template_id','type'=>'INTEGER','title'=>'Using Template','join'=>'name FROM '.TABLE_PREFIX.'template WHERE template_id'));
+        $this->addTableCol(array('id'=>'email_from','type'=>'EMAIL','title'=>'Email FROM address','new'=>MAIL_FROM));
         $this->addTableCol(array('id'=>'subject','type'=>'STRING','title'=>'Subject','hint'=>'This is email Subject text'));
         $this->addTableCol(array('id'=>'body_markdown','type'=>'TEXT','secure'=>false,'title'=>'Body','rows'=>20,
                                  'hint'=>'Uses <a href="http://parsedown.org/tests/" target="_blank">parsedown</a> extended <a href="https://www.markdownguide.org/basic-syntax" target="_blank">markdown</a> format, or raw html','list'=>false));
@@ -50,13 +52,19 @@ class Message extends Table
 
         $this->setupFiles(array('table'=>TABLE_PREFIX.'file','location'=>'MSG','max_no'=>10,'title'=>'Attachments',
                                 'icon'=>'<span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>&nbsp;&nbsp;manage',
-                                'list'=>false,'list_no'=>5,'storage'=>STORAGE,
+                                'list'=>true,'list_no'=>5,'storage'=>STORAGE,
                                 'link_page'=>'message_file','link_data'=>'SIMPLE','width'=>'700','height'=>'600'));
         
 
         
     }
     
+    protected function modifyRowValue($col_id,$data,&$value) {
+        if($col_id === 'body_html') {
+            $value = substr($value,0,500).'....';           
+        }   
+    } 
+
     protected function viewTableActions() 
     {
         $html = '';
@@ -122,7 +130,8 @@ class Message extends Table
         return $html; 
     }
 
-    protected function updateTable() {
+    protected function updateTable() 
+    {
         $error_tmp = '';
         $html = '';
         $action_count = 0;
@@ -188,13 +197,34 @@ class Message extends Table
         return $html;
     }
 
+    protected function beforeUpdate($id,$edit_type,&$form,&$error_str) 
+    {
+        $from = explode('@',$form['email_from']);
+
+        $found = false;
+        $restrict_emails = Email::extractEmails(EMAIL_FROM_RESTRICT);
+        $restrict_domains = '';
+        foreach($restrict_emails as $address) {
+            $restrict = explode('@',$address);
+            $restrict_domains .= '@'.$restrict[1].' ';
+            if(stripos($restrict[1],$from[1]) !== false) $found = true;
+        }
+
+        if(!$found) {
+            $error_str .= 'From email address domain['.$from[1].'] must have one of following domains: "'.$restrict_domains.'"" ';
+        }
+        
+
+    }
+
+
     protected function afterUpdate($id,$edit_type,$form) 
     {
         //converts page markdown into html and save 
         $text = $form['body_markdown'];
         if($text !== '') {
             $html = Html::markdownToHtml($text);      
-            $sql = 'UPDATE '.TABLE_PREFIX.'message SET body_html = "'.$this->db->escapeSql($html).'" ';
+            $sql = 'UPDATE '.TABLE_PREFIX.'message SET body_html = "'.$this->db->escapeSql($html).'" '.
                    'WHERE message_id = "'.$this->db->escapeSql($id).'"';
             $this->db->executeSql($sql,$error_tmp);
         }  
@@ -207,4 +237,3 @@ class Message extends Table
     }  
     
 }
-?>

@@ -20,6 +20,8 @@ class Task extends SeritiTask
 
     public function setup()
     {
+        $this->addBlock('EMAIL',1,1,'Email tasks');
+
         //check within emails per hour limit
         if(defined('EMAIL_LIMIT_HOUR')) {
             $sql = 'SELECT COUNT(*) FROM '.TABLE_QUEUE.' '.
@@ -51,11 +53,11 @@ class Task extends SeritiTask
                 $param['flag_complete'] = 'DONE';
                 $param['div_progress'] = 'div_ajax';
                 $param['run_limit'] = $this->batch_no;
-                $this->addTask($task_id,'Process message: <b>'.$subject.'</b> queue(<b>'.$count.'</b> to process)',$param);
+                $this->addTask('EMAIL',$task_id,'Process message: <b>'.$subject.'</b> queue(<b>'.$count.'</b> to process)',$param);
 
 
                 $task_id = 'CLEAR_MSG'.$message_id;
-                $this->addTask($task_id,'Remove <b>'.$count.'</b> recipients for message: <b>'.$subject.'</b>');
+                $this->addTask('EMAIL',$task_id,'Remove <b>'.$count.'</b> recipients for message: <b>'.$subject.'</b>');
             }
         } else {
             $this->addMessage('NO unprocessed message recpients found in queue.'); 

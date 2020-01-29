@@ -124,7 +124,7 @@ class ImportWizard
                   } 
                   
                   if(!$error_file and $i > 1 and $value_num > 5) {  
-                        $status = Helpers::importContact($this->db,$update_contact,$file_format,$line,$error);
+                        $status = Helpers::importCsvContact($this->db,$update_contact,$file_format,$line,$error);
                         if($error !== '') {
                             $this->addError($error);
                         } else {

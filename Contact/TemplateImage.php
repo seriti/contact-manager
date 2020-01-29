@@ -37,7 +37,7 @@ class TemplateImage extends Upload
                              'Finally you need to click [Upload selected images] button to upload images to server.';
         
         //NB: only need to add non-standard file cols here, or if you need to modify standard file col setup
-        $this->addFileCol(array('id'=>'link_id','type'=>'STRING','title'=>'Link ID','upload'=>false));
+        $this->addFileCol(array('id'=>'link_id','type'=>'STRING','title'=>'Link ID','upload'=>true,'hint'=>'Use simple text identifier for linking into template'));
     }
 }
 ?>

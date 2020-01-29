@@ -12,8 +12,7 @@ class Group extends Table
         $param = ['row_name'=>'Group','col_label'=>'name'];
         parent::setup($param);
 
-        $this->info['EDIT']='Enter any additional group data into notes text field. All fields are searchable.'.
-                            'Finally you need to click [Submit] button at bottom of page to save group data to server.';                         
+        $this->addForeignKey(array('table'=>TABLE_PREFIX.'group_link','col_id'=>'group_id','message'=>'Contact group'));                 
 
 
         $this->addTableCol(array('id'=>'group_id','type'=>'INTEGER','title'=>'Group ID','key'=>true,'key_auto'=>true,'list'=>true));
@@ -28,6 +27,12 @@ class Group extends Table
 
         $this->addSearch(array('name','notes'),array('rows'=>1));
 
-    }    
+    } 
+
+    protected function beforeDelete($id,&$error) 
+    { 
+        //$sql = 'DELETE FROM '.TABLE_PREFIX.'group_link WHERE group_id = "'.$this->db->escapeSql($id).'" ';
+        //$this->db->executeSql($sql,$error);
+    }   
 }
 ?>
