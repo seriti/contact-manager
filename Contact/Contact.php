@@ -12,7 +12,7 @@ class Contact extends Table
 {
     function afterUpdate($id,$edit_type,$form) {
         if($edit_type === 'INSERT') {
-            $sql='UPDATE '.TABLE_PREFIX.'contacts SET create_date = "'.date('Y-m-d').'" '.
+            $sql='UPDATE '.TABLE_PREFIX.'contacts SET create_date = "'.date('Y-m-d').'", guid = UUID() '.
                  'WHERE contact_id = "'.$this->db->escapeSql($id).'"';
             $this->db->executeSql($sql,$error_tmp);
         }
@@ -39,6 +39,7 @@ class Contact extends Table
         $this->addTableCol(array('id'=>'address','type'=>'TEXT','title'=>'Address','required'=>false,'list'=>false));
         $this->addTableCol(array('id'=>'notes','type'=>'TEXT','title'=>'Notes','required'=>false,'list'=>false));
         $this->addTableCol(array('id'=>'create_date','type'=>'DATE','title'=>'Create date','edit'=>false,'list'=>false));
+        $this->addTableCol(array('id'=>'status','type'=>'STRING','title'=>'Status','new'=>'OK','hint'=>'Set to HIDE to remove from future communications'));
 
 
         //this slows things down quite a bit so disable if you dont need it, and searchXtra() below
@@ -51,9 +52,10 @@ class Contact extends Table
         //$this->addAction(array('type'=>'view','text'=>'view','icon_text'=>'view'));
         $this->addAction(array('type'=>'delete','text'=>'delete','icon_text'=>'delete','pos'=>'R'));
 
-        $this->addSearch(array('name','surname','email','email_alt','tel','cell','url','address','notes','create_date'),array('rows'=>3));
+        $this->addSearch(array('name','surname','email','email_alt','tel','cell','url','address','notes','status'),array('rows'=>3));
         $this->addSearchXtra('G.group_id','Message Group');
 
+        $this->addSelect('status','(SELECT "OK") UNION ALL (SELECT "HIDE")');
         $this->addSelect('G_group_id','SELECT group_id,name FROM '.TABLE_PREFIX.'group ORDER BY name');
 
     } 

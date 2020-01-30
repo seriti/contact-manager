@@ -3,6 +3,7 @@ namespace App\Contact;
 
 use Exception;
 use Seriti\Tools\Csv;
+use Seriti\Tools\Crypt;
 use Seriti\Tools\Queue;
 use Seriti\Tools\Audit;
 use Seriti\Tools\Upload;
@@ -15,6 +16,33 @@ use Psr\Container\ContainerInterface;
 
 //static functions for saveme module
 class Helpers {
+
+    //NB this is generally called oustide admin interface so make sure constant TABLE_PREFIX is defined correctly
+    public static function unsubscribeContact($db,$guid,&$error) 
+    {
+        $error = '';
+
+        if($guid === '') {
+            $error = 'No contact identifier given.';
+        } else {
+            $sql = 'SELECT contact_id,name,surname,email,status '.
+                   'FROM '.TABLE_PREFIX.'contact WHERE guid = "'.$db->escapeSql($guid).'" ';
+            $contact = $db->readSqlRecord($sql); 
+            if($contact == 0) {
+                $error = 'Could not recognise unsubscribe link identifier['.$guid.'].';
+            } else {
+                if($contact['status'] !== 'HIDE') {
+                    $sql = 'UPDATE '.TABLE_PREFIX.'contact SET status = "HIDE" '.
+                           'WHERE contact_id = "'.$contact['contact_id'].'" '; 
+                    $db->executeSql($sql,$error_tmp);
+                    if($error_tmp !== '') $error .= 'Could not update contact status.';
+                }
+            }
+        }
+
+        if($error === '') return $contact; else return false;    
+    }
+
     public static function addContactToGroup($db,$contact_id,$group_id,&$error) 
     {
         $error = '';
@@ -77,7 +105,7 @@ class Helpers {
         $sql = 'SELECT C.contact_id,C.name '.
                'FROM '.TABLE_PREFIX.'group_link AS L '.
                'JOIN '.TABLE_PREFIX.'contact AS C ON(L.contact_id = C.contact_id) '.
-               'WHERE L.group_id = "'.$db->escapeSql($group_id).'" ';
+               'WHERE L.group_id = "'.$db->escapeSql($group_id).'" AND C.status <> "HIDE" ';
         $contacts = $db->readSqlList($sql); 
 
         if($contacts == 0) {
@@ -320,6 +348,8 @@ class Helpers {
             
             $address = Csv::csvStrip($line[44]);
             $url = Csv::csvStrip($line[61]);
+
+            $contact_status = 'OK';
         } 
         
         if($format === 'OUTLOOK') {
@@ -348,6 +378,8 @@ class Helpers {
             
             $address = Csv::csvStrip($line[23]);
             $url = Csv::csvStrip($line[6]);
+
+            $contact_status = 'OK';
         }
 
         if($format === 'SERITI') {
@@ -364,10 +396,11 @@ class Helpers {
             $phone_type[] = 'mobile'; 
             $phone_num[] = Csv::csvStrip($line[5]);
           
-            $notes = Csv::csvStrip($line[6]);
+            $contact_status = Csv::csvStrip($line[6]);
 
-            //$address = Csv::csvStrip($line[23]);
-            //$url = Csv::csvStrip($line[6]);
+            //$notes = Csv::csvStrip($line[?]);
+            //$address = Csv::csvStrip($line[?]);
+            //$url = Csv::csvStrip($line[?]);
         } 
         
         //only save contacts with at least one email or phone number
@@ -424,7 +457,10 @@ class Helpers {
                             $status.= '_UPDATE'; 
                         } 
                     }  
-                } else {  
+                } else {
+                    //do NOT set status for updates as this will override unsubscribe or other status changes by contact.  
+                    $data['status'] = $contact_status;
+                    $data['guid'] = Crypt::makeToken();
                     $contact_id = $db->insertRecord(TABLE_PREFIX.'contact',$data,$error_tmp);
                     if($error_tmp !== '') {
                         $error .= 'Could NOT create Contact:'.$error_tmp; 
@@ -503,6 +539,7 @@ class Helpers {
             } else {
                 $data['create_date'] = date('Y-m-d');
                 if(!isset($data['status'])) $data['status'] = "OK";
+                $data['guid'] = Crypt::makeToken();
 
                 $contact_id = $db->insertRecord(TABLE_PREFIX.'contact',$data,$error_tmp);
                 if($error_tmp !== '') {

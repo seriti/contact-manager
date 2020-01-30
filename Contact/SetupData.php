@@ -26,8 +26,10 @@ class SetupData extends SetupModuledata
                               `link_id` int(11) NOT NULL,
                               `link_type` varchar(64) NOT NULL,
                               `status` varchar(64) NOT NULL,
+                              `guid` varchar(64) NOT NULL,
                               PRIMARY KEY (`contact_id`),
-                              KEY `con_contact_idx1` (`email`)
+                              KEY `con_contact_idx1` (`email`),
+                              KEY `con_contact_idx2` (`guid`)
                             ) ENGINE=MyISAM DEFAULT CHARSET=utf8'); 
 
         $this->addCreateSql('group',
@@ -90,7 +92,7 @@ class SetupData extends SetupModuledata
                
         //initialisation
         $this->addInitialSql('INSERT INTO `TABLE_PREFIXcontact` (name,surname,email,cell,notes,create_date,status) '.
-                             'VALUES("Spongebob","Squarepants","bob@squarepants.com","+27 123 456 7890","My first fantasy contact",CURDATE(),"OK"');
+                             'VALUES("Spongebob","Squarepants","bob@squarepants.com","+27 123 456 7890","My first fantasy contact",CURDATE(),"OK",UUID()');
         
 
         //updates use time stamp in ['YYYY-MM-DD HH:MM'] format, must be unique and sequential

@@ -5,6 +5,9 @@ The code snippet below is for use within an existing src/routes.php file within 
 copy the "/contact" group into the existing "/admin" group within existing "src/routes.php" file 
 */
 
+//required if you use unsubscribe links in emails, must be outside /admin group
+$app->get('/contact', \App\Contact\ContactPublicController::class);
+
 $app->group('/admin', function () {
 
     $this->group('/contact', function () {

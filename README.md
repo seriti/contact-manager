@@ -32,6 +32,8 @@ Once you have a local copy of module code check that it has following structure:
 
 4.) Open the routes.php file and insert the **$this->group('/contact', function (){}** route definition block
 within the existing  **$app->group('/admin', function () {}** code block contained in existing skeleton **[directory-for-app]/src/routes.php** file.
+There is an addition publicly accessible route for email unsubscribe links which should be outside /admin group and have no access restrictions.
+Each contact has a GUID which is used to identify the contact for public access links.
 
 5.) Open the setup_app.php file and  add the module config code snippet into bottom of skeleton **[directory-for-app]/src/setup_app.php** file.
 Please check the **table_prefix** value to ensure that there will not be a clash with any existing tables in your database.
@@ -46,3 +48,5 @@ Now click link at bottom of page "Setup Database": This will create all necessar
 Thats it, you are good to go. Add some contacts or import from Google or Outlook CSV dumps.   
 Then you can setup contact groups and email templates, and add groups to the email queue before processing.  
 You can also use the seriti skeleton customise module to add Contact module routes to application menu  .
+
+Note that templates and messages may have {NANE}, {SURNAME}, {EMAIL}, {UNSUBSCRIBE_LINK}, {UNSUBSCRIBE_URL} placeholders which will be replace by relevant contact data. 
