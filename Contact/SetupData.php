@@ -91,7 +91,7 @@ class SetupData extends SetupModuledata
 
                
         //initialisation
-        $this->addInitialSql('INSERT INTO `TABLE_PREFIXcontact` (name,surname,email,cell,notes,create_date,status) '.
+        $this->addInitialSql('INSERT INTO `TABLE_PREFIXcontact` (name,surname,email,cell,notes,create_date,status,guid) '.
                              'VALUES("Spongebob","Squarepants","bob@squarepants.com","+27 123 456 7890","My first fantasy contact",CURDATE(),"OK",UUID()');
         
 

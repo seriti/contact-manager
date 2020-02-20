@@ -1,6 +1,7 @@
 <?php 
 namespace App\Contact;
 
+use Exception;
 use Seriti\Tools\Table;
 use Seriti\Tools\Form;
 use Seriti\Tools\Html;
@@ -11,10 +12,14 @@ use Seriti\Tools\Audit;
 class Contact extends Table 
 {
     function afterUpdate($id,$edit_type,$form) {
+        $error = '';
         if($edit_type === 'INSERT') {
-            $sql='UPDATE '.TABLE_PREFIX.'contacts SET create_date = "'.date('Y-m-d').'", guid = UUID() '.
+            $sql='UPDATE '.TABLE_PREFIX.'contact SET create_date = "'.date('Y-m-d').'", guid = UUID() '.
                  'WHERE contact_id = "'.$this->db->escapeSql($id).'"';
-            $this->db->executeSql($sql,$error_tmp);
+            $this->db->executeSql($sql,$error);
+            if($error !== '') {
+                throw new Exception('CONTACT_INSERT_ERROR: could not assign create date and guid values to new contact');
+            }
         }
     }  
 
