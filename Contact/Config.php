@@ -34,7 +34,7 @@ class Config
         define('TABLE_PREFIX',$module['table_prefix']);
         define('EMAIL_LIMIT_HOUR',1000);
         //can have semi-colon separated list of email addresses
-        define('EMAIL_FROM_RESTRICT','');
+        define('EMAIL_FROM_RESTRICT',MAIL_FROM);
         
         define('MODULE_ID','CONTACT');
         define('MODULE_LOGO','<span class="glyphicon glyphicon-send"></span> Contact manager');

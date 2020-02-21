@@ -46,7 +46,8 @@ class SetupData extends SetupModuledata
                               `group_id` int(11) NOT NULL,
                               `contact_id` int(11) NOT NULL,
                               PRIMARY KEY (`link_id`),
-                              UNIQUE KEY `idx_group_link1` (`group_id`,`contact_id`)
+                              UNIQUE KEY `idx_group_link1` (`group_id`,`contact_id`),
+                              KEY `idx_group_link2` (`contact_id`)
                             ) ENGINE=MyISAM DEFAULT CHARSET=utf8');
 
         $this->addCreateSql('message',
