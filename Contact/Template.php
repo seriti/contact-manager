@@ -41,7 +41,7 @@ class Template extends Table
 
         $this->setupImages(array('table'=>TABLE_PREFIX.'file','location'=>'TMP','max_no'=>10,
                                   'icon'=>'<span class="glyphicon glyphicon-picture" aria-hidden="true"></span>&nbsp;manage',
-                                  'list'=>false,'list_no'=>5,'storage'=>STORAGE,
+                                  'list'=>true,'list_no'=>3,'storage'=>STORAGE,
                                   'link_page'=>'template_image','link_data'=>'SIMPLE','width'=>'700','height'=>'600'));
     }
 
