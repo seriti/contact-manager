@@ -11,18 +11,7 @@ use Seriti\Tools\Audit;
 
 class Contact extends Table 
 {
-    function afterUpdate($id,$edit_type,$form) {
-        $error = '';
-        if($edit_type === 'INSERT') {
-            $sql='UPDATE '.TABLE_PREFIX.'contact SET create_date = "'.date('Y-m-d').'", guid = UUID() '.
-                 'WHERE contact_id = "'.$this->db->escapeSql($id).'"';
-            $this->db->executeSql($sql,$error);
-            if($error !== '') {
-                throw new Exception('CONTACT_INSERT_ERROR: could not assign create date and guid values to new contact');
-            }
-        }
-    }  
-
+    
     //configure
     public function setup($param = []) 
     {
@@ -64,6 +53,88 @@ class Contact extends Table
         $this->addSelect('G_group_id','SELECT group_id,name FROM '.TABLE_PREFIX.'group ORDER BY name');
 
     } 
+
+    protected function viewEditXtra($id,$form,$context) 
+    {
+        $html = '';
+        $table_group = TABLE_PREFIX.'group';
+        $table_link = TABLE_PREFIX.'group_link';
+
+        $sql = 'SELECT group_id,name FROM '.$table_group.' ORDER BY name ';
+        $groups = $this->db->readSqlList($sql);
+
+        if($context === 'UPDATE') {
+            $sql = 'SELECT group_id FROM '.$table_link.' WHERE contact_id = "'.$this->db->escapeSql($id).'" ';
+            $links = $this->db->readSqlList($sql);
+        } else {
+            $links = [];
+        }            
+            
+        if($groups !== 0) {
+            $html .= 'Manage contact groups:<ul>';
+            foreach($groups as $group_id => $name) {
+                $form_id = 'group_link'.$group_id;
+                if(isset($_POST[$form_id]) or in_array($group_id,$links)) $checked = true; else $checked = false;
+
+                $html .= '<li>'.Form::checkBox($form_id,true,$checked).' '.$name.'</li>';
+            }
+            $html .= '</ul>';
+        }
+
+        return $html;
+    }
+
+    function afterUpdate($id,$edit_type,$form) {
+        $error = '';
+        $table_group = TABLE_PREFIX.'group';
+        $table_link = TABLE_PREFIX.'group_link';
+
+        if($edit_type === 'INSERT') {
+            $sql='UPDATE '.TABLE_PREFIX.'contact SET create_date = "'.date('Y-m-d').'", guid = UUID() '.
+                 'WHERE contact_id = "'.$this->db->escapeSql($id).'"';
+            $this->db->executeSql($sql,$error);
+            if($error !== '') {
+                throw new Exception('CONTACT_INSERT_ERROR: could not assign create date and guid values to new contact');
+            }
+        }
+
+        //manage contact group links
+        $sql = 'SELECT group_id,name FROM '.$table_group.' ORDER BY name ';
+        $groups = $this->db->readSqlList($sql);
+        if($groups !== 0) {
+            //get existing contact group links
+            $sql = 'SELECT link_id,group_id FROM '.$table_link.' WHERE contact_id = "'.$this->db->escapeSql($id).'" ';
+            $links = $this->db->readSqlList($sql);
+            if($links === 0) {
+                unset($links);
+                $links = [];
+            }  
+
+            //check for changes
+            foreach($groups as $group_id => $name) {
+                $form_id = 'group_link'.$group_id;
+                if(isset($_POST[$form_id])) $checked = true; else $checked = false;
+                $link_id = array_search($group_id,$links);
+                if($link_id !== false ) $linked = true; else $linked = false;
+                if($linked !== $checked) {
+                    if($checked === true) {
+                        $sql = 'INSERT INTO '.$table_link.' (group_id,contact_id) VALUES("'.$this->db->escapeSql($group_id).'","'.$this->db->escapeSql($id).'")';
+                    } else {
+                        $sql = 'DELETE FROM '.$table_link.' WHERE link_id = "'.$link_id.'" ';
+                    }
+
+                    $this->db->executeSql($sql,$error);
+                    if($error !== '') {
+                        throw new Exception('CONTACT_GROUP_LINK_ERROR: could not update contact-group link');
+                    }
+                }
+
+                $html .= '<li>'.Form::checkBox($form_id,true,$checked).' '.$name.'</li>';
+            }
+
+        }
+    }  
+
 
     //removes contact from any groups
     protected function afterDelete($id) {
