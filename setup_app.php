@@ -6,7 +6,7 @@ add the below code snippet to the end of existing "src/setup_app.php" file.
 This tells the framework about module: name, sub-memnu route list and title, database table prefix.
 */
 
-$container['config']->set('module','contact',['name'=>'Contact',
+$container['config']->set('module','contact',['name'=>'Contact manager',
                                              'route_root'=>'admin/contact/',
                                              'route_list'=>['dashboard'=>'Dashboard','contact'=>'Contacts','group'=>'Groups',
                                                             'message'=>'Messages','template'=>'Templates','task'=>'Tasks'],
