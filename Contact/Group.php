@@ -23,6 +23,8 @@ class Group extends Table
         //$this->addAction(array('type'=>'view','text'=>'view','icon_text'=>'view'));
         $this->addAction(array('type'=>'delete','text'=>'delete','icon_text'=>'delete','pos'=>'R'));
 
+        $this->addSortOrder('T.name','Group name','DEFAULT');
+
         $this->addAction(array('type'=>'popup','text'=>'Linked contacts','url'=>'group_link','mode'=>'view','width'=>600,'height'=>600)); 
 
         $this->addSearch(array('name','notes'),array('rows'=>1));

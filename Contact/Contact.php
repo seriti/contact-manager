@@ -11,12 +11,17 @@ use Seriti\Tools\Audit;
 
 class Contact extends Table 
 {
-    
+    private $table_link;
+    private $table_group;
+
     //configure
     public function setup($param = []) 
     {
         $param = ['row_name'=>'Contact','col_label'=>'name','distinct'=>true];
         parent::setup($param);
+
+        $this->table_group = TABLE_PREFIX.'group';
+        $this->table_link = TABLE_PREFIX.'group_link';
 
         $this->info['EDIT']='Enter any additional contact data into notes text field. All fields are searchable.'.
                             'Finally you need to click [Submit] button at bottom of page to save contact data to server.';                         
@@ -26,12 +31,13 @@ class Contact extends Table
         $this->addTableCol(array('id'=>'name','type'=>'STRING','title'=>'Name'));
         $this->addTableCol(array('id'=>'surname','type'=>'STRING','title'=>'Surname','required'=>false));
         $this->addTableCol(array('id'=>'email','type'=>'EMAIL','title'=>'Email'));
-        $this->addTableCol(array('id'=>'email_alt','type'=>'EMAIL','title'=>'Alternative email','required'=>false));
+        $this->addTableCol(array('id'=>'email_alt','type'=>'EMAIL','title'=>'Alternative email','required'=>false,'list'=>false));
         $this->addTableCol(array('id'=>'tel','type'=>'STRING','title'=>'Landline','required'=>false));
         $this->addTableCol(array('id'=>'cell','type'=>'STRING','title'=>'Mobile','required'=>false));
         $this->addTableCol(array('id'=>'url','type'=>'URL','title'=>'URL','size'=>24,'required'=>false,'list'=>false));
+        $this->addTableCol(array('id'=>'notes','type'=>'TEXT','title'=>'Notes','required'=>false));
+        $this->addTableCol(array('id'=>'groups','type'=>'CUSTOM','title'=>'Groups','edit'=>false,'linked'=>'KEY_VAL'));
         $this->addTableCol(array('id'=>'address','type'=>'TEXT','title'=>'Address','required'=>false,'list'=>false));
-        $this->addTableCol(array('id'=>'notes','type'=>'TEXT','title'=>'Notes','required'=>false,'list'=>false));
         $this->addTableCol(array('id'=>'create_date','type'=>'DATE','title'=>'Create date','edit'=>false,'list'=>false));
         $this->addTableCol(array('id'=>'status','type'=>'STRING','title'=>'Status','new'=>'OK','hint'=>'Set to HIDE to remove from future communications'));
 
@@ -54,17 +60,29 @@ class Contact extends Table
 
     } 
 
+    protected function modifyRowValue($col_id,$data,&$value) {
+        if($col_id === 'groups') {
+            $sql = 'SELECT G.group_id,G.name FROM '.$this->table_link.' AS L JOIN '.$this->table_group.' AS G  ON(L.group_id = G.group_id) '.
+                   'WHERE L.contact_id = "'.$this->db->escapeSql($value).'" ';
+            $list = $this->db->readSqlList($sql); 
+            if($list == 0) {
+                $value = '';
+            }  else {
+                $value = Html::arrayToList($list);
+            }   
+
+        }
+    } 
+
     protected function viewEditXtra($id,$form,$context) 
     {
         $html = '';
-        $table_group = TABLE_PREFIX.'group';
-        $table_link = TABLE_PREFIX.'group_link';
-
-        $sql = 'SELECT group_id,name FROM '.$table_group.' ORDER BY name ';
+        
+        $sql = 'SELECT group_id,name FROM '.$this->table_group.' ORDER BY name ';
         $groups = $this->db->readSqlList($sql);
 
         if($context === 'UPDATE') {
-            $sql = 'SELECT group_id FROM '.$table_link.' WHERE contact_id = "'.$this->db->escapeSql($id).'" ';
+            $sql = 'SELECT group_id FROM '.$this->table_link.' WHERE contact_id = "'.$this->db->escapeSql($id).'" ';
             $links = $this->db->readSqlList($sql);
         } else {
             $links = [];
@@ -84,11 +102,9 @@ class Contact extends Table
         return $html;
     }
 
-    function afterUpdate($id,$edit_type,$form) {
+    protected function afterUpdate($id,$edit_type,$form) {
         $error = '';
-        $table_group = TABLE_PREFIX.'group';
-        $table_link = TABLE_PREFIX.'group_link';
-
+        
         if($edit_type === 'INSERT') {
             $sql='UPDATE '.TABLE_PREFIX.'contact SET create_date = "'.date('Y-m-d').'", guid = UUID() '.
                  'WHERE contact_id = "'.$this->db->escapeSql($id).'"';
@@ -99,11 +115,11 @@ class Contact extends Table
         }
 
         //manage contact group links
-        $sql = 'SELECT group_id,name FROM '.$table_group.' ORDER BY name ';
+        $sql = 'SELECT group_id,name FROM '.$this->table_group.' ORDER BY name ';
         $groups = $this->db->readSqlList($sql);
         if($groups !== 0) {
             //get existing contact group links
-            $sql = 'SELECT link_id,group_id FROM '.$table_link.' WHERE contact_id = "'.$this->db->escapeSql($id).'" ';
+            $sql = 'SELECT link_id,group_id FROM '.$this->table_link.' WHERE contact_id = "'.$this->db->escapeSql($id).'" ';
             $links = $this->db->readSqlList($sql);
             if($links === 0) {
                 unset($links);
@@ -118,9 +134,9 @@ class Contact extends Table
                 if($link_id !== false ) $linked = true; else $linked = false;
                 if($linked !== $checked) {
                     if($checked === true) {
-                        $sql = 'INSERT INTO '.$table_link.' (group_id,contact_id) VALUES("'.$this->db->escapeSql($group_id).'","'.$this->db->escapeSql($id).'")';
+                        $sql = 'INSERT INTO '.$this->table_link.' (group_id,contact_id) VALUES("'.$this->db->escapeSql($group_id).'","'.$this->db->escapeSql($id).'")';
                     } else {
-                        $sql = 'DELETE FROM '.$table_link.' WHERE link_id = "'.$link_id.'" ';
+                        $sql = 'DELETE FROM '.$this->table_link.' WHERE link_id = "'.$link_id.'" ';
                     }
 
                     $this->db->executeSql($sql,$error);
@@ -139,7 +155,7 @@ class Contact extends Table
     //removes contact from any groups
     protected function afterDelete($id) {
         $error = '';
-        $sql = 'DELETE FROM '.TABLE_PREFIX.'group_link '.
+        $sql = 'DELETE FROM '.$this->table_link.' '.
                'WHERE contact_id = "'.$this->db->escapeSql($id).'" ';
         $this->db->executeSql($sql,$error);
 
