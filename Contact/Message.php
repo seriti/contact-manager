@@ -53,7 +53,7 @@ class Message extends Table
         $this->setupFiles(array('table'=>TABLE_PREFIX.'file','location'=>'MSG','max_no'=>10,'title'=>'Attachments',
                                 'icon'=>'<span class="glyphicon glyphicon-folder-open" aria-hidden="true"></span>&nbsp;&nbsp;manage',
                                 'list'=>true,'list_no'=>5,'storage'=>STORAGE,
-                                'link_page'=>'message_file','link_data'=>'SIMPLE','width'=>'700','height'=>'600'));
+                                'link_url'=>'message_file','link_data'=>'SIMPLE','width'=>'700','height'=>'600'));
         
 
         
