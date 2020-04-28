@@ -27,7 +27,7 @@ $app->group('/admin', function () {
     })->add(\App\Contact\Config::class);
 
 
-})->add(\App\ConfigAdmin::class);
+})->add(\App\User\ConfigAdmin::class);
 
 
 
