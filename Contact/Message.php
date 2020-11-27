@@ -61,7 +61,7 @@ class Message extends Table
     
     protected function modifyRowValue($col_id,$data,&$value) {
         if($col_id === 'body_html') {
-            $value = substr($value,0,500).'....';           
+            //$value = substr($value,0,500).'....';           
         }   
     } 
 

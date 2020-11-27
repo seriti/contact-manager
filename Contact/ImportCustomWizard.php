@@ -39,7 +39,11 @@ class ImportCustomWizard
     protected $user_id;
 
     //define whatever types of contact links you want to import
-    protected $link_types = array('USER_ALL'=>'All system users','USER_ADMIN'=>'All ADMIN zone users','USER_XXX'=>'All XXX zone users','WHATEVER'=>'All WHATEVER table records with email');
+    protected $link_types = array('USER_ALL'=>'All system users',
+                                  'USER_ADMIN'=>'All ADMIN zone users',
+                                  'USER_PUBLIC'=>'All PUBLIC zone users');
+    //'WHATEVER'=>'All WHATEVER table records with email'
+
     protected $upload_dir = BASE_UPLOAD.UPLOAD_TEMP;
     protected $max_size = 1000000;
 
@@ -128,7 +132,7 @@ class ImportCustomWizard
                            'FROM user_admin WHERE status <> "HIDE" ';
 
                     if($link_type === 'USER_ADMIN') $sql .= 'AND zone = "ALL" OR zone = "ADMIN" ';       
-                    if($link_type === 'USER_XXX') $sql .= 'AND zone = "XXX" '; 
+                    if($link_type === 'USER_PUBLIC') $sql .= 'AND zone = "PUBLIC" '; 
                     
                     $users = $this->db->readSqlArray($sql); 
                     if($users == 0) {
