@@ -95,8 +95,8 @@ class ImportCustomWizard
 
                 //NB: you can have whatever logic you like here 
                 if($link_type === 'WHATEVER') {
-                    $sql = 'SELECT WHATEVER_id,name,email,cell,tel FROM WHATEVER '.
-                           'WHERE TRIM(email) <> "" ';
+                    $sql = 'SELECT `WHATEVER_id`,`name`,`email`,`cell`,`tel` FROM `WHATEVER` '.
+                           'WHERE TRIM(`email`) <> "" ';
                     $records = $this->db->readSqlArray($sql); 
                     if($records == 0) {
                         $this->addError('NO WHATEVER records found to import');
@@ -128,11 +128,11 @@ class ImportCustomWizard
                 
                 //import system users from a user zone or all users.
                 if(substr($link_type,0,4) === 'USER') {
-                    $sql = 'SELECT user_id, name, email '.
-                           'FROM user_admin WHERE status <> "HIDE" ';
+                    $sql = 'SELECT `user_id`, `name`, `email` '.
+                           'FROM `user_admin` WHERE `status` <> "HIDE" ';
 
-                    if($link_type === 'USER_ADMIN') $sql .= 'AND zone = "ALL" OR zone = "ADMIN" ';       
-                    if($link_type === 'USER_PUBLIC') $sql .= 'AND zone = "PUBLIC" '; 
+                    if($link_type === 'USER_ADMIN') $sql .= 'AND `zone` = "ALL" OR `zone` = "ADMIN" ';       
+                    if($link_type === 'USER_PUBLIC') $sql .= 'AND `zone` = "PUBLIC" '; 
                     
                     $users = $this->db->readSqlArray($sql); 
                     if($users == 0) {
@@ -181,7 +181,7 @@ class ImportCustomWizard
             $link_param = [];
             $link_param['xtra'] = ['NONE'=>'Select group you wish to link contacts to.'];
             $link_param['class'] = 'form-control edit_input';  
-            $sql = 'SELECT group_id,name FROM '.TABLE_PREFIX.'group ORDER BY name ';   
+            $sql = 'SELECT `group_id`,`name` FROM `'.TABLE_PREFIX.'group` ORDER BY `name` ';   
             $html .= '<div class="'.$this->classes['col_label'].'">Select import link group:</div><div class="col-sm-6">'.
                      Form::sqlList($sql,$this->db,'link_group_id',$link_group_id,$link_param).
                      '</div>';

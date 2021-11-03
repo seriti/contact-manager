@@ -61,8 +61,8 @@ class MessageQueue extends Queue
         
         $message_str .= str_replace('_',' ',$email_type).' ID['.$param['contact_id'].'] '.$param['name'].': ';
 
-        $sql = 'SELECT name, surname, email, guid, status '.
-               'FROM '.TABLE_PREFIX.'contact WHERE contact_id = "'.$param['contact_id'].'" ';
+        $sql = 'SELECT `name`, `surname`, `email`, `guid`, `status` '.
+               'FROM `'.TABLE_PREFIX.'contact` WHERE `contact_id` = "'.$param['contact_id'].'" ';
         $contact = $this->db->readSqlRecord($sql);
         
         if($contact == 0) {

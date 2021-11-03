@@ -24,7 +24,7 @@ class MessageFile extends Upload
         $param['label']     = 'subject';
         $param['child_col'] = 'location_id';
         $param['child_prefix'] = $id_prefix ;
-        $param['show_sql'] = 'SELECT CONCAT("Attachments for message: ",subject) FROM '.TABLE_PREFIX.'message WHERE message_id = "{KEY_VAL}"';
+        $param['show_sql'] = 'SELECT CONCAT("Attachments for message: ",`subject`) FROM `'.TABLE_PREFIX.'message` WHERE `message_id` = "{KEY_VAL}"';
         $this->setupMaster($param);
 
         $this->addAction(array('type'=>'edit','text'=>'edit details of','icon_text'=>'edit'));

@@ -27,7 +27,7 @@ class TemplateImage extends Upload
         $param['label']     = 'name';
         $param['child_col'] = 'location_id';
         $param['child_prefix'] = $id_prefix ;
-        $param['show_sql'] = 'SELECT CONCAT("Images for template: ",name) FROM '.TABLE_PREFIX.'template WHERE template_id = "{KEY_VAL}"';
+        $param['show_sql'] = 'SELECT CONCAT("Images for template: ",`name`) FROM `'.TABLE_PREFIX.'template` WHERE `template_id` = "{KEY_VAL}"';
         $this->setupMaster($param);
 
         $this->addAction(array('type'=>'edit','text'=>'edit details of','icon_text'=>'edit'));

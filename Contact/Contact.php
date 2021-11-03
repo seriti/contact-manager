@@ -45,7 +45,7 @@ class Contact extends Table
         //this slows things down quite a bit so disable if you dont need it, and searchXtra() below
         $this->addSql('JOIN','LEFT JOIN '.TABLE_PREFIX.'group_link AS G ON(T.contact_id = G.contact_id)');
 
-        $this->addSortOrder('create_date DESC,surname,name ','Create date, Surname, Name','DEFAULT');
+        $this->addSortOrder('`create_date` DESC,`surname`,`name` ','Create date, Surname, Name','DEFAULT');
 
         $this->addAction(array('type'=>'check_box','text'=>''));
         $this->addAction(array('type'=>'edit','text'=>'edit','icon_text'=>'edit'));
@@ -56,14 +56,14 @@ class Contact extends Table
         $this->addSearchXtra('G.group_id','Message Group');
 
         $this->addSelect('status','(SELECT "OK") UNION ALL (SELECT "HIDE")');
-        $this->addSelect('G_group_id','SELECT group_id,name FROM '.TABLE_PREFIX.'group ORDER BY name');
+        $this->addSelect('G_group_id','SELECT `group_id`,`name` FROM `'.TABLE_PREFIX.'group` ORDER BY `name`');
 
     } 
 
     protected function modifyRowValue($col_id,$data,&$value) {
         if($col_id === 'groups') {
-            $sql = 'SELECT G.group_id,G.name FROM '.$this->table_link.' AS L JOIN '.$this->table_group.' AS G  ON(L.group_id = G.group_id) '.
-                   'WHERE L.contact_id = "'.$this->db->escapeSql($value).'" ';
+            $sql = 'SELECT G.`group_id`,G.`name` FROM `'.$this->table_link.'` AS L JOIN `'.$this->table_group.'` AS G  ON(L.`group_id` = G.`group_id`) '.
+                   'WHERE L.`contact_id` = "'.$this->db->escapeSql($value).'" ';
             $list = $this->db->readSqlList($sql); 
             if($list == 0) {
                 $value = '';
@@ -78,11 +78,11 @@ class Contact extends Table
     {
         $html = '';
         
-        $sql = 'SELECT group_id,name FROM '.$this->table_group.' ORDER BY name ';
+        $sql = 'SELECT `group_id`,`name` FROM `'.$this->table_group.'` ORDER BY `name` ';
         $groups = $this->db->readSqlList($sql);
 
         if($context === 'UPDATE') {
-            $sql = 'SELECT group_id FROM '.$this->table_link.' WHERE contact_id = "'.$this->db->escapeSql($id).'" ';
+            $sql = 'SELECT `group_id` FROM `'.$this->table_link.'` WHERE `contact_id` = "'.$this->db->escapeSql($id).'" ';
             $links = $this->db->readSqlList($sql);
         } else {
             $links = [];
@@ -106,8 +106,8 @@ class Contact extends Table
         $error = '';
         
         if($edit_type === 'INSERT') {
-            $sql='UPDATE '.TABLE_PREFIX.'contact SET create_date = "'.date('Y-m-d').'", guid = UUID() '.
-                 'WHERE contact_id = "'.$this->db->escapeSql($id).'"';
+            $sql='UPDATE `'.TABLE_PREFIX.'contact` SET `create_date` = "'.date('Y-m-d').'", `guid` = UUID() '.
+                 'WHERE `contact_id` = "'.$this->db->escapeSql($id).'"';
             $this->db->executeSql($sql,$error);
             if($error !== '') {
                 throw new Exception('CONTACT_INSERT_ERROR: could not assign create date and guid values to new contact');
@@ -115,11 +115,11 @@ class Contact extends Table
         }
 
         //manage contact group links
-        $sql = 'SELECT group_id,name FROM '.$this->table_group.' ORDER BY name ';
+        $sql = 'SELECT `group_id`,`name` FROM `'.$this->table_group.'` ORDER BY `name` ';
         $groups = $this->db->readSqlList($sql);
         if($groups !== 0) {
             //get existing contact group links
-            $sql = 'SELECT link_id,group_id FROM '.$this->table_link.' WHERE contact_id = "'.$this->db->escapeSql($id).'" ';
+            $sql = 'SELECT `link_id`,`group_id` FROM `'.$this->table_link.'` WHERE `contact_id` = "'.$this->db->escapeSql($id).'" ';
             $links = $this->db->readSqlList($sql);
             if($links === 0) {
                 unset($links);
@@ -134,9 +134,9 @@ class Contact extends Table
                 if($link_id !== false ) $linked = true; else $linked = false;
                 if($linked !== $checked) {
                     if($checked === true) {
-                        $sql = 'INSERT INTO '.$this->table_link.' (group_id,contact_id) VALUES("'.$this->db->escapeSql($group_id).'","'.$this->db->escapeSql($id).'")';
+                        $sql = 'INSERT INTO `'.$this->table_link.'` (`group_id`,`contact_id`) VALUES("'.$this->db->escapeSql($group_id).'","'.$this->db->escapeSql($id).'")';
                     } else {
-                        $sql = 'DELETE FROM '.$this->table_link.' WHERE link_id = "'.$link_id.'" ';
+                        $sql = 'DELETE FROM `'.$this->table_link.'` WHERE `link_id` = "'.$link_id.'" ';
                     }
 
                     $this->db->executeSql($sql,$error);
@@ -155,8 +155,8 @@ class Contact extends Table
     //removes contact from any groups
     protected function afterDelete($id) {
         $error = '';
-        $sql = 'DELETE FROM '.$this->table_link.' '.
-               'WHERE contact_id = "'.$this->db->escapeSql($id).'" ';
+        $sql = 'DELETE FROM `'.$this->table_link.'` '.
+               'WHERE `contact_id` = "'.$this->db->escapeSql($id).'" ';
         $this->db->executeSql($sql,$error);
 
     } 
@@ -210,7 +210,7 @@ class Contact extends Table
 
             $param = array();
             $param['class'] = $this->classes['action'];
-            $sql = 'SELECT group_id,name FROM '.TABLE_PREFIX.'group ORDER BY name';
+            $sql = 'SELECT `group_id`,`name` FROM `'.TABLE_PREFIX.'group` ORDER BY `name`';
             $html .= '<span id="group_select" style="display:none"> group&raquo;'.
                      Form::sqlList($sql,$this->db,'group_id',$group_id,$param).
                      '</span>';    

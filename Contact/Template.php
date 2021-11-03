@@ -51,8 +51,8 @@ class Template extends Table
         $text = $form['template_markdown'];
         if($text !== '') {
             $html = Html::markdownToHtml($text);      
-            $sql='UPDATE '.TABLE_PREFIX.'template SET template_html = "'.$this->db->escapeSql($html).'" '.
-                 'WHERE template_id = "'.$this->db->escapeSql($id).'"';
+            $sql='UPDATE `'.TABLE_PREFIX.'template` SET `template_html` = "'.$this->db->escapeSql($html).'" '.
+                 'WHERE `template_id` = "'.$this->db->escapeSql($id).'"';
             $this->db->executeSql($sql,$error_tmp);
         }  
     }  

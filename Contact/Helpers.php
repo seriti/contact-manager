@@ -25,15 +25,15 @@ class Helpers {
         if($guid === '') {
             $error = 'No contact identifier given.';
         } else {
-            $sql = 'SELECT contact_id,name,surname,email,status '.
-                   'FROM '.TABLE_PREFIX.'contact WHERE guid = "'.$db->escapeSql($guid).'" ';
+            $sql = 'SELECT `contact_id`,`name`,`surname`,`email`,`status` '.
+                   'FROM `'.TABLE_PREFIX.'contact` WHERE `guid` = "'.$db->escapeSql($guid).'" ';
             $contact = $db->readSqlRecord($sql); 
             if($contact == 0) {
                 $error = 'Could not recognise unsubscribe link identifier['.$guid.'].';
             } else {
                 if($contact['status'] !== 'HIDE') {
-                    $sql = 'UPDATE '.TABLE_PREFIX.'contact SET status = "HIDE" '.
-                           'WHERE contact_id = "'.$contact['contact_id'].'" '; 
+                    $sql = 'UPDATE `'.TABLE_PREFIX.'contact` SET `status` = "HIDE" '.
+                           'WHERE `contact_id` = "'.$contact['contact_id'].'" '; 
                     $db->executeSql($sql,$error_tmp);
                     if($error_tmp !== '') $error .= 'Could not update contact status.';
                 }
@@ -49,13 +49,13 @@ class Helpers {
         $error_tmp = '';
         $info = '';
 
-        $sql = 'SELECT COUNT(*) FROM '.TABLE_PREFIX.'group_link '.
-               'WHERE group_id = "'.$db->escapeSql($group_id).'" AND contact_id = "'.$db->escapeSql($contact_id).'" ';
+        $sql = 'SELECT COUNT(*) FROM `'.TABLE_PREFIX.'group_link` '.
+               'WHERE `group_id` = "'.$db->escapeSql($group_id).'" AND `contact_id` = "'.$db->escapeSql($contact_id).'" ';
         $exists = $db->readSqlValue($sql);
         if($exists != 0 ) {
             $info = 'EXISTS';
         } else {
-            $sql = 'INSERT INTO '.TABLE_PREFIX.'group_link (group_id,contact_id) '.
+            $sql = 'INSERT INTO `'.TABLE_PREFIX.'group_link` (`group_id`,`contact_id`) '.
                    'VALUES("'.$db->escapeSql($group_id).'","'.$db->escapeSql($contact_id).'")';
             $db->executeSql($sql,$error_tmp);
             if($error_tmp !== '') {
@@ -76,9 +76,9 @@ class Helpers {
         $info_str = '';
 
         $process_id = 'CONTACT_MSG'.$message_id;
-        $sql = 'SELECT process_status,COUNT(*) FROM '.TABLE_QUEUE.' '.
-               'WHERE process_id = "'.$db->escapeSql($process_id).'" '.
-               'GROUP BY process_status ';
+        $sql = 'SELECT `process_status`,COUNT(*) FROM `'.TABLE_QUEUE.'` '.
+               'WHERE `process_id` = "'.$db->escapeSql($process_id).'" '.
+               'GROUP BY `process_status` ';
         $info = $db->readSqlList($sql);
         if($info != 0 ) {
             if($info['NEW'] > 0) $info_str .= 'Message awaiting processing for '.$info['NEW']." contacts\r\n";
@@ -88,8 +88,8 @@ class Helpers {
             $info_str .= 'Message not added to queue yet!';
         }
 
-        $sql = 'UPDATE '.TABLE_PREFIX.'message SET info = "'.$db->escapeSql($info_str).'" '.
-               'WHERE message_id = "'.$db->escapeSql($message_id).'" ';
+        $sql = 'UPDATE `'.TABLE_PREFIX.'message` SET `info` = "'.$db->escapeSql($info_str).'" '.
+               'WHERE `message_id` = "'.$db->escapeSql($message_id).'" ';
         $db->executeSql($sql,$error);
 
         if($error === '') return true; else return false;
@@ -102,10 +102,10 @@ class Helpers {
         $output = '';
 
         //get message group contacts
-        $sql = 'SELECT C.contact_id,C.name '.
-               'FROM '.TABLE_PREFIX.'group_link AS L '.
-               'JOIN '.TABLE_PREFIX.'contact AS C ON(L.contact_id = C.contact_id) '.
-               'WHERE L.group_id = "'.$db->escapeSql($group_id).'" AND C.status <> "HIDE" ';
+        $sql = 'SELECT C.`contact_id`,C.`name` '.
+               'FROM `'.TABLE_PREFIX.'group_link` AS L '.
+               'JOIN `'.TABLE_PREFIX.'contact` AS C ON(L.`contact_id` = C.`contact_id`) '.
+               'WHERE L.`group_id` = "'.$db->escapeSql($group_id).'" AND C.`status` <> "HIDE" ';
         $contacts = $db->readSqlList($sql); 
 
         if($contacts == 0) {
@@ -152,11 +152,11 @@ class Helpers {
         //$mailer = clone $container['mail']; ???
         $mailer = clone $container['mail'];
 
-        $sql = 'SELECT M.message_id,M.template_id,M.subject,M.body_html, '.
-                      'T.name as template,T.template_html '.
-               'FROM con_message AS M '.
-               'JOIN con_template AS T ON(M.template_id = T.template_id)'.
-               'WHERE M.message_id = "'.$db->escapeSql($message_id).'" ';
+        $sql = 'SELECT M.`message_id`,M.`template_id`,M.`subject`,M.`body_html`, '.
+                      'T.`name` as `template`,T.`template_html` '.
+               'FROM `con_message` AS M '.
+               'JOIN `con_template` AS T ON(M.`template_id` = T.`template_id`)'.
+               'WHERE M.`message_id` = "'.$db->escapeSql($message_id).'" ';
         $message = $db->readSqlRecord($sql); 
         if($message == 0 ) {
             $error = 'Invaid message ID['.$message_id.']';
@@ -166,8 +166,8 @@ class Helpers {
             
             //Template images
             $location_id = 'TMP'.$message['template_id'];
-            $sql = 'SELECT file_id,file_name_orig,link_id FROM '.TABLE_PREFIX.'file '.
-                   'WHERE location_id = "'.$location_id.'" ORDER BY file_id ';
+            $sql = 'SELECT `file_id`,`file_name_orig`,`link_id` FROM `'.TABLE_PREFIX.'file` '.
+                   'WHERE `location_id` = "'.$location_id.'" ORDER BY `file_id` ';
             $template_files = $db->readSqlArray($sql);
             if($template_files != 0) {
                 //get any embedded images for template wherever they might be
@@ -194,8 +194,8 @@ class Helpers {
 
             //message attachments
             $location_id = 'MSG'.$message['message_id'];
-            $sql = 'SELECT file_id,file_name_orig,file_size FROM '.TABLE_PREFIX.'file '.
-                   'WHERE location_id = "'.$location_id.'" ORDER BY file_id ';
+            $sql = 'SELECT `file_id`,`file_name_orig`,`file_size` FROM `'.TABLE_PREFIX.'file` '.
+                   'WHERE `location_id` = "'.$location_id.'" ORDER BY `file_id` ';
             $message_files = $db->readSqlArray($sql);
             if($message_files != 0) {
                 $body .= '<br/>Please see attached documents('.count($message_files).').';
@@ -408,7 +408,7 @@ class Helpers {
             $found = false;
             
             if($email[0] !== '') {
-                $sql = 'SELECT * FROM '.TABLE_PREFIX.'contact WHERE email = "'. $db->escapeSql($email[0]).'" ';
+                $sql = 'SELECT * FROM `'.TABLE_PREFIX.'contact` WHERE `email` = "'. $db->escapeSql($email[0]).'" ';
                 $contact = $db->readSqlRecord($sql);  
                 if($contact != 0) $found = true;
             }

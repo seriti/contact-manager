@@ -30,7 +30,8 @@ class Message extends Table
         $this->classes['col_value'] = 'col-sm-9 col-lg-10 edit_value';
         
         $this->addTableCol(array('id'=>'message_id','type'=>'INTEGER','title'=>'Message ID','key'=>true,'key_auto'=>true,'list'=>true));
-        $this->addTableCol(array('id'=>'template_id','type'=>'INTEGER','title'=>'Using Template','join'=>'name FROM '.TABLE_PREFIX.'template WHERE template_id'));
+        $this->addTableCol(array('id'=>'template_id','type'=>'INTEGER','title'=>'Using Template',
+                                 'join'=>'`name` FROM `'.TABLE_PREFIX.'template` WHERE `template_id`'));
         $this->addTableCol(array('id'=>'email_from','type'=>'EMAIL','title'=>'Email FROM address','new'=>MAIL_FROM));
         $this->addTableCol(array('id'=>'subject','type'=>'STRING','title'=>'Subject','hint'=>'This is email Subject text'));
         $this->addTableCol(array('id'=>'body_markdown','type'=>'TEXT','secure'=>false,'title'=>'Body','rows'=>20,
@@ -46,7 +47,7 @@ class Message extends Table
         $this->addAction(array('type'=>'edit','text'=>'edit','icon_text'=>'edit'));
         $this->addAction(array('type'=>'delete','text'=>'delete','icon_text'=>'delete','pos'=>'R'));
 
-        $this->addSelect('template_id','SELECT template_id,name FROM '.TABLE_PREFIX.'template ORDER BY name');
+        $this->addSelect('template_id','SELECT `template_id`,`name` FROM `'.TABLE_PREFIX.'template` ORDER BY `name`');
 
         $this->addSearch(array('message_id','subject','body_html','create_date','info'),array('rows'=>2));
 
@@ -113,7 +114,7 @@ class Message extends Table
             $param = array();
             $param['class'] = $this->classes['action'];
             $param['xtra'] = ['ALL'=>'All valid contacts'];
-            $sql = 'SELECT group_id,name FROM '.TABLE_PREFIX.'group ORDER BY name';
+            $sql = 'SELECT `group_id`,`name` FROM `'.TABLE_PREFIX.'group` ORDER BY `name`';
             $html .= '<span id="group_select" style="display:none"> group&raquo;'.
                      Form::sqlList($sql,$this->db,'group_id',$group_id,$param).
                      '</span>';          
@@ -224,14 +225,14 @@ class Message extends Table
         $text = $form['body_markdown'];
         if($text !== '') {
             $html = Html::markdownToHtml($text);      
-            $sql = 'UPDATE '.TABLE_PREFIX.'message SET body_html = "'.$this->db->escapeSql($html).'" '.
-                   'WHERE message_id = "'.$this->db->escapeSql($id).'"';
+            $sql = 'UPDATE `'.TABLE_PREFIX.'message` SET `body_html` = "'.$this->db->escapeSql($html).'" '.
+                   'WHERE `message_id` = "'.$this->db->escapeSql($id).'"';
             $this->db->executeSql($sql,$error_tmp);
         }  
 
         if($edit_type === 'INSERT') {
-            $sql = 'UPDATE '.TABLE_PREFIX.'message SET create_date = "'.date('Y-m-d').'", info = "Message not queued yet!" '.
-                   'WHERE message_id = "'.$this->db->escapeSql($id).'"';
+            $sql = 'UPDATE `'.TABLE_PREFIX.'message` SET `create_date` = "'.date('Y-m-d').'", `info` = "Message not queued yet!" '.
+                   'WHERE `message_id` = "'.$this->db->escapeSql($id).'"';
             $this->db->executeSql($sql,$error_tmp);
         }
     }  

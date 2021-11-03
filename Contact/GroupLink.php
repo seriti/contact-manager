@@ -16,12 +16,13 @@ class GroupLink extends Table
 
         //NB: master_col_idX shoudl be replaced by suitable master table cols you wish to use
         $this->setupMaster(array('table'=>TABLE_PREFIX.'group','key'=>'group_id','child_col'=>'group_id','label'=>'name', 
-                                'show_sql'=>'SELECT CONCAT("Group:",name) FROM '.TABLE_PREFIX.'group WHERE group_id = "{KEY_VAL}" '));  
+                                'show_sql'=>'SELECT CONCAT("Group:",`name`) FROM `'.TABLE_PREFIX.'group` WHERE `group_id` = "{KEY_VAL}" '));  
 
         $this->addTableCol(array('id'=>'link_id','type'=>'INTEGER','title'=>'Link ID','key'=>true,'key_auto'=>true,'list'=>false));
-        $this->addTableCol(array('id'=>'contact_id','type'=>'INTEGER','title'=>'Linked Contact','join'=>'CONCAT(surname,", ",name,"(",email,")") FROM '.TABLE_PREFIX.'contact WHERE contact_id'));
+        $this->addTableCol(array('id'=>'contact_id','type'=>'INTEGER','title'=>'Linked Contact',
+                                 'join'=>'CONCAT(`surname`,", ",`name`,"(",`email`,")") FROM `'.TABLE_PREFIX.'contact` WHERE `contact_id`'));
                
-        $this->addSql('JOIN','LEFT JOIN '.TABLE_PREFIX.'contact AS C ON(T.contact_id = C.contact_id)');
+        $this->addSql('JOIN','LEFT JOIN `'.TABLE_PREFIX.'contact` AS C ON(T.`contact_id` = C.`contact_id`)');
 
         $this->addAction(array('type'=>'check_box','text'=>''));
         //$this->addAction(array('type'=>'edit','text'=>'edit'));

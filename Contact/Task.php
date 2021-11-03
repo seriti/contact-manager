@@ -24,8 +24,8 @@ class Task extends SeritiTask
 
         //check within emails per hour limit
         if(defined('EMAIL_LIMIT_HOUR')) {
-            $sql = 'SELECT COUNT(*) FROM '.TABLE_QUEUE.' '.
-                   'WHERE process_id LIKE "CONTACT_MSG%" AND process_complete = 1  AND TIMESTAMPDIFF(MINUTE,date_process,NOW()) < 60 ';
+            $sql = 'SELECT COUNT(*) FROM `'.TABLE_QUEUE.'` '.
+                   'WHERE `process_id` LIKE "CONTACT_MSG%" AND `process_complete` = 1  AND TIMESTAMPDIFF(MINUTE,`date_process`,NOW()) < 60 ';
             $emails_last_hour = $this->db->readSqlValue($sql);
             
             if($emails_last_hour >= EMAIL_LIMIT_HOUR) {
@@ -35,15 +35,15 @@ class Task extends SeritiTask
         }
         
 
-        $sql = 'SELECT process_id,COUNT(*) FROM '.TABLE_QUEUE.' '.
-               'WHERE process_id LIKE "CONTACT_MSG%" AND process_complete = 0 AND process_status <> "ERROR" '.
-               'GROUP BY process_id';
+        $sql = 'SELECT `process_id`,COUNT(*) FROM `'.TABLE_QUEUE.'` '.
+               'WHERE `process_id` LIKE "CONTACT_MSG%" AND `process_complete` = 0 AND `process_status` <> "ERROR" '.
+               'GROUP BY `process_id`';
         $message_queue = $this->db->readSqlList($sql);
         if($message_queue != 0) {
             foreach($message_queue as $process_id=>$count) {
                 
                 $message_id = str_replace('CONTACT_MSG','',$process_id);
-                $sql = 'SELECT subject FROM '.TABLE_PREFIX.'message WHERE message_id = "'.$message_id .'" ';
+                $sql = 'SELECT `subject` FROM `'.TABLE_PREFIX.'message` WHERE `message_id` = "'.$message_id .'" ';
                 $subject = $this->db->readSqlValue($sql);
 
                 $task_id = 'PROCESS_MSG'.$message_id;
@@ -81,7 +81,8 @@ class Task extends SeritiTask
             if(!isset($param['process'])) $param['process'] = false;
                 
             if($param['process']) {
-                $sql = 'DELETE FROM '.TABLE_QUEUE.' WHERE process_id = "'.$this->db->escapeSql($process_id).'" AND process_complete = 0 AND process_status <> "ERROR" ';
+                $sql = 'DELETE FROM `'.TABLE_QUEUE.'` WHERE `process_id` = "'.$this->db->escapeSql($process_id).'" '.
+                       'AND `process_complete` = 0 AND `process_status` <> "ERROR" ';
                 $reset_count = $this->db->executeSql($sql,$error);
                 if($error === '') {   
                     $this->addMessage('EMAIL CLEAR: '.$reset_count.' emails in queue removed.');
@@ -92,7 +93,7 @@ class Task extends SeritiTask
                 $audit_str = 'Contact tasks: '.$reset_count.' emails in queue removed';
                 Audit::action($this->db,$this->user_id,$id,$audit_str);
             } else {
-                $sql = 'SELECT subject FROM '.TABLE_PREFIX.'message WHERE message_id = "'.$message_id .'" ';
+                $sql = 'SELECT `subject` FROM `'.TABLE_PREFIX.'message` WHERE `message_id` = "'.$message_id .'" ';
                 $subject = $this->db->readSqlValue($sql);
 
                 $html .= 'Please confirm that you wish to clear all unprocessed recipients for message: <b>'.$subject.'</b><br/>'.
@@ -110,10 +111,11 @@ class Task extends SeritiTask
                 $message_id = str_replace('PROCESS_MSG','',$id);
                 $process_id = 'CONTACT_MSG'.$message_id;
 
-                $sql = 'SELECT subject FROM '.TABLE_PREFIX.'message WHERE message_id = "'.$message_id .'" ';
+                $sql = 'SELECT `subject` FROM `'.TABLE_PREFIX.'message` WHERE `message_id` = "'.$message_id .'" ';
                 $subject = $this->db->readSqlValue($sql);
 
-                $sql = 'SELECT COUNT(*) FROM queue WHERE process_id = "'.$this->db->escapeSql($process_id).'" AND process_complete = 0 AND process_status <> "ERROR" ';
+                $sql = 'SELECT COUNT(*) FROM `queue` WHERE `process_id` = "'.$this->db->escapeSql($process_id).'" '.
+                       'AND `process_complete` = 0 AND `process_status` <> "ERROR" ';
                 $count = $this->db->readSqlValue($sql);
 
                 $html = 'MESSAGE QUEUE: Click <a id="link_email" href="javascript:server_task_setup()" onclick="link_download(\'link_email\')">'.
